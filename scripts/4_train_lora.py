@@ -152,8 +152,8 @@ if __name__ == "__main__":
     # 4. LoRA Configuration
     print("\n--- Step 4: Configuring LoRA ---")
     lora_config = LoraConfig(
-        r=32,
-        lora_alpha=64,
+        r=64,
+        lora_alpha=128,
         target_modules=["q_proj", "k_proj", "v_proj","dense"],
         lora_dropout=0.1,
         bias="none",
@@ -166,7 +166,7 @@ if __name__ == "__main__":
     print("\n--- Step 5: Setting up Training ---")
     training_args = TrainingArguments(
         output_dir=OUTPUT_DIR,
-        num_train_epochs=20,
+        num_train_epochs=1,
         per_device_train_batch_size=1,
         learning_rate=3e-4,
         fp16=torch.cuda.is_available(),
@@ -188,8 +188,6 @@ if __name__ == "__main__":
     # 7. Log Metrics and Save Artifacts
     print("\n--- Step 7: Saving Model and Logging Metrics ---")
     metrics = train_result.metrics
-    trainer.log_metrics("train", metrics)
-    trainer.save_metrics("train", metrics)
     trainer.save_model()
 
     print("Training complete.")
@@ -228,9 +226,6 @@ if __name__ == "__main__":
                 print("\n--- Average LLM Judge Scores ---")
                 for score, value in avg_scores.items():
                     print(f"{score}: {value:.2f}")
-                
-                trainer.log_metrics("llm_judge", avg_scores)
-                trainer.save_metrics("llm_judge", avg_scores)
         else:
             print("No valid LLM judge scores to average.")
     else:
