@@ -1,0 +1,14 @@
+artifact_uri: file:///teamspace/studios/this_studio/Study-Spark/scripts/mlruns/0/987fab74380c4b02b81f7a6bc46c6b31/artifacts
+end_time: 1761925566741
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 987fab74380c4b02b81f7a6bc46c6b31
+run_name: capable-auk-759
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1761925525714
+status: 3
+tags: []
+user_id: akshitm

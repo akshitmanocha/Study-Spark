@@ -2,10 +2,15 @@
 import pypdfium2 as pdfium
 import sys
 
+
 def extract_text(pdf_path, txt_path):
     """
     Extracts text from a PDF file and saves it to a text file.
     """
+    import os
+
+    os.makedirs(os.path.dirname(txt_path), exist_ok=True)
+
     try:
         doc = pdfium.PdfDocument(pdf_path)
         with open(txt_path, "w", encoding="utf-8") as f:

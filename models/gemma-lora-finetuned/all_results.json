@@ -1,0 +1,11 @@
+{
+    "avg_accuracy": 4.25,
+    "avg_coherence": 4.25,
+    "avg_relevance": 6.0,
+    "epoch": 5.0,
+    "total_flos": 3810784448640000.0,
+    "train_loss": 1.8792182003640379,
+    "train_runtime": 670.9728,
+    "train_samples_per_second": 1.423,
+    "train_steps_per_second": 1.423
+}

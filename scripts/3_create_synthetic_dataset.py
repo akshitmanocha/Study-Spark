@@ -10,12 +10,15 @@ from transformers import AutoTokenizer, AutoModel
 import google.generativeai as genai
 
 # --- Configuration ---
-TEXT_FILE_PATH = "/Users/akshitmanocha/Documents/Deep Learning/Study-Spark/data/processed/UnderstandingDeepLearning.txt"
-INDEX_PATH = "/Users/akshitmanocha/Documents/Deep Learning/Study-Spark/data/processed/faiss_index.bin"
-CHUNKS_PATH = "/Users/akshitmanocha/Documents/Deep Learning/Study-Spark/data/processed/chunks.pkl"
-QUESTIONS_FILE_PATH = "/Users/akshitmanocha/Documents/Deep Learning/Study-Spark/data/processed/questions.txt"
-DATASET_FILE_PATH = "/Users/akshitmanocha/Documents/Deep Learning/Study-Spark/data/processed/finetuning_dataset.jsonl"
-EMBEDDING_MODEL_NAME = 'google/embedding-gemma-300m'
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, '..'))
+
+TEXT_FILE_PATH = os.path.join(PROJECT_ROOT, "data", "processed", "UnderstandingDeepLearning.txt")
+INDEX_PATH = os.path.join(PROJECT_ROOT, "data", "processed", "faiss_index.bin")
+CHUNKS_PATH = os.path.join(PROJECT_ROOT, "data", "processed", "chunks.pkl")
+
+DATASET_FILE_PATH = os.path.join(PROJECT_ROOT, "data", "processed", "finetuning_dataset.jsonl")
+EMBEDDING_MODEL_NAME = 'google/embeddinggemma-300m'
 
 # --- Gemini API Configuration ---
 try:
@@ -23,7 +26,7 @@ try:
     if not api_key:
         raise ValueError("GOOGLE_API_KEY environment variable not set.")
     genai.configure(api_key=api_key)
-    gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+    gemini_model = genai.GenerativeModel('gemini-2.0-flash')
 except Exception as e:
     print(f"Error configuring Gemini API: {e}")
     exit()
@@ -112,43 +115,57 @@ if __name__ == "__main__":
     print(f"Found {len(chapters)} chapters.")
 
     # 3. Process each chapter
-    with open(QUESTIONS_FILE_PATH, 'w', encoding='utf-8') as qf, \
-         open(DATASET_FILE_PATH, 'w', encoding='utf-8') as df:
+    with open(DATASET_FILE_PATH, 'w', encoding='utf-8') as df:
 
         for title, content in chapters.items():
             print(f"\n--- Processing Chapter: {title} ---")
 
-            # a. Generate lecture
-            print("Generating lecture content...")
-            lecture_prompt = f"You are a university professor giving a lecture on the following chapter from the book 'Understanding Deep Learning'. Your lecture should be a concise and engaging overview of the key concepts. Do not just summarize the text, but present it in a lecture format. Here is the chapter content:\n\n{content[:4000]}" # Use a portion to avoid overly long prompts
-            lecture = generate_with_gemini(lecture_prompt)
+            # a. Generate 10 key topics from the chapter
+            print("Generating 10 key topics...")
+            topics_prompt = f"Based on the following chapter content, identify 10 distinct key topics or concepts. The chapter is '{title}'. Present the topics as a simple numbered list (e.g., '1. Topic A\n2. Topic B\n...'). Do not add any other text before or after the list.\n\n{content[:4000]}"
+            topics_text = generate_with_gemini(topics_prompt)
+            # Simple parsing for a numbered list.
+            topics = [line.strip() for line in topics_text.split('\n') if line.strip() and line.strip()[0].isdigit()]
 
-            # b. Generate questions
-            print("Generating questions...")
-            questions_prompt = f"Generate 5 insightful questions based on the following chapter content. The questions should test a deep understanding of the material.\n\n{content[:4000]}"
-            questions = generate_with_gemini(questions_prompt)
-            qf.write(f"## Questions for {title}\n")
-            qf.write(questions)
-            qf.write("\n\n")
+            if not topics:
+                print(f"Could not generate topics for {title}. Skipping.")
+                continue
 
-            # c. Retrieve relevant chunks
-            print("Retrieving relevant chunks...")
-            lecture_embedding = get_embeddings(lecture, embedding_model, embedding_tokenizer, device)
-            retrieved_chunks = retrieve_relevant_chunks(lecture_embedding, faiss_index, all_chunks)
-            retrieved_text = "\n\n---\n\n".join(retrieved_chunks)
+            # b. Process each topic to create a dataset entry
+            for i, topic in enumerate(topics):
+                print(f"  - Processing topic {i+1}/{len(topics)}: {topic}")
 
-            # d. Summarize for dataset
-            print("Generating summary for dataset...")
-            summary_prompt = f"You are an expert in deep learning. Your task is to create a high-quality, concise summary of the following text, which is a combination of a lecture and relevant excerpts from a textbook. The summary should be in the form of notes that a student could use to study. Here is the text:\n\n## Lecture Content:\n{lecture}\n\n## Retrieved Textbook Excerpts:\n{retrieved_text}"
-            summary = generate_with_gemini(summary_prompt)
+                # i. Generate lecture for the topic
+                print("    Generating lecture content...")
+                lecture_prompt = f"You are a university professor giving a lecture. Your task is to explain the following topic in a concise and engaging way, using the provided chapter content as context.\n\n## Topic:\n{topic}\n\n## Chapter Content:\n{content[:4000]}"
+                lecture = generate_with_gemini(lecture_prompt)
 
-            # e. Save to dataset file
-            dataset_entry = {
-                "input": f"## Lecture Content:\n{lecture}\n\n## Retrieved Textbook Excerpts:\n{retrieved_text}",
-                "output": summary
-            }
-            df.write(json.dumps(dataset_entry) + '\n')
+                if not lecture:
+                    print(f"    Could not generate lecture for topic '{topic}'. Skipping.")
+                    continue
+
+                # ii. Retrieve relevant chunks
+                print("    Retrieving relevant chunks...")
+                lecture_embedding = get_embeddings(lecture, embedding_model, embedding_tokenizer, device)
+                retrieved_chunks = retrieve_relevant_chunks(lecture_embedding, faiss_index, all_chunks)
+                retrieved_text = "\n\n---\n\n".join(retrieved_chunks)
+
+                # iii. Summarize for dataset
+                print("    Generating summary for dataset...")
+                summary_prompt = f"You are an expert in deep learning. Your task is to create a high-quality, concise summary of the following text, which is a combination of a lecture on a specific topic and relevant excerpts from a textbook. The summary should be in the form of notes that a student could use to study.\n\n## Lecture on '{topic}':\n{lecture}\n\n## Retrieved Textbook Excerpts:\n{retrieved_text}"
+                summary = generate_with_gemini(summary_prompt)
+
+                if not summary:
+                    print(f"    Could not generate summary for topic '{topic}'. Skipping.")
+                    continue
+
+                # iv. Save to dataset file
+                dataset_entry = {
+                    "input": f"<lecture_start>\n{lecture}\n<lecture_end>\n\n<context_start>\n{retrieved_text}\n<context_end>",
+                    "output": summary
+                }
+                df.write(json.dumps(dataset_entry) + '\n')
 
     print("\n\nProcessing complete.")
-    print(f"Questions saved to: {QUESTIONS_FILE_PATH}")
+
     print(f"Finetuning dataset saved to: {DATASET_FILE_PATH}")

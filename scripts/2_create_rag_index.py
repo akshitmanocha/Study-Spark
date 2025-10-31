@@ -55,10 +55,10 @@ def save_chunks(chunks, chunks_path):
     print(f"Text chunks saved to {chunks_path}")
 
 if __name__ == "__main__":
-    TEXT_FILE_PATH = "/Users/akshitmanocha/Documents/Deep Learning/Study-Spark/data/processed/UnderstandingDeepLearning.txt"
-    INDEX_PATH = "/Users/akshitmanocha/Documents/Deep Learning/Study-Spark/data/processed/faiss_index.bin"
-    CHUNKS_PATH = "/Users/akshitmanocha/Documents/Deep Learning/Study-Spark/data/processed/chunks.pkl"
-    MODEL_NAME = 'google/embedding-gemma-300m'
+    TEXT_FILE_PATH = "/teamspace/studios/this_studio/Study-Spark/data/processed/UnderstandingDeepLearning.txt"
+    INDEX_PATH = "/teamspace/studios/this_studio/Study-Spark/data/processed/faiss_index.bin"
+    CHUNKS_PATH = "/teamspace/studios/this_studio/Study-Spark/data/processed/chunks.pkl"
+    MODEL_NAME = 'google/embeddinggemma-300m'
 
     # 1. Get device
     device = get_device()
