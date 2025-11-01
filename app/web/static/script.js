@@ -8,6 +8,8 @@ const stopBtn = document.getElementById('stop-btn');
 const recordingIndicator = document.getElementById('recording-indicator');
 const audioPlayback = document.getElementById('audio-playback');
 const audioFileInput = document.getElementById('audio-file');
+const downloadBtn = document.getElementById('download-btn');
+const downloadSection = document.getElementById('download-section');
 
 let mediaRecorder;
 let audioChunks = [];
@@ -49,6 +51,7 @@ form.addEventListener('submit', async (e) => {
     loading.classList.remove('hidden');
     summaryContainer.classList.add('hidden');
     errorContainer.classList.add('hidden');
+    downloadSection.classList.add('hidden');
 
     const formData = new FormData();
     const llm = document.getElementById('llm').value;
@@ -65,7 +68,7 @@ form.addEventListener('submit', async (e) => {
     }
 
     try {
-        const response = await fetch('/study/', { // Changed to relative URL
+        const response = await fetch('/study/', {
             method: 'POST',
             body: formData
         });
@@ -77,7 +80,8 @@ form.addEventListener('submit', async (e) => {
 
         const data = await response.json();
         summaryDiv.innerHTML = data.summary.replace(/\n/g, '<br>');
-        summaryContainer.classList.remove('hidden');
+
+        downloadSection.classList.remove('hidden');
 
     } catch (error) {
         console.error('Error:', error);
@@ -86,4 +90,17 @@ form.addEventListener('submit', async (e) => {
     } finally {
         loading.classList.add('hidden');
     }
+});
+
+downloadBtn.addEventListener('click', () => {
+    const summaryText = summaryDiv.innerHTML.replace(/<br>/g, '\n');
+    const blob = new Blob([summaryText], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'study_guide.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 });
