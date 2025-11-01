@@ -6,35 +6,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study Buddy</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-900 text-white">
+
     <div class="container mx-auto p-8">
-        <h1 class="text-4xl font-bold text-center mb-8">Study Buddy</h1>
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">Study Buddy</h1>
+            <p class="text-lg text-gray-400 mt-2">Your AI-powered study assistant</p>
+        </header>
 
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-            <h2 class="text-2xl font-semibold mb-4">Upload Lecture Audio</h2>
-            <div class="flex items-center space-x-4">
-                <input type="file" id="audio-file" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
-                <button id="process-btn" class="bg-violet-500 text-white font-bold py-2 px-4 rounded-full hover:bg-violet-700">Process</button>
+        <div class="bg-gray-800 p-8 rounded-xl shadow-2xl max-w-2xl mx-auto">
+            <form id="study-form">
+                <div class="mb-6">
+                    <label for="audio-file" class="block text-gray-400 font-semibold mb-2">Upload Audio File:</label>
+                    <input type="file" id="audio-file" name="audio-file" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+
+                <div class="text-center text-gray-500 my-4">OR</div>
+
+                <div class="mb-6 text-center">
+                    <label class="block text-gray-400 font-semibold mb-2">Record Audio:</label>
+                    <button type="button" id="record-btn" class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-all duration-300"><i class="fas fa-microphone"></i> Start Recording</button>
+                    <button type="button" id="stop-btn" class="hidden bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-all duration-300"><i class="fas fa-stop"></i> Stop Recording</button>
+                    <div id="recording-indicator" class="hidden mt-4 text-yellow-400">
+                        <i class="fas fa-circle-notch fa-spin"></i> Recording...
+                    </div>
+                    <audio id="audio-playback" controls class="hidden mt-4 w-full"></audio>
+                </div>
+
+                <div class="mb-6">
+                    <label for="llm" class="block text-gray-400 font-semibold mb-2">Select LLM:</label>
+                    <select id="llm" name="llm" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="groq">Groq</option>
+                        <option value="finetuned">Fine-tuned</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white p-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-300 font-bold">Generate Study Guide</button>
+            </form>
+
+            <div id="loading" class="hidden text-center mt-6">
+                <p class="text-lg text-gray-400">Generating study guide... This may take a moment.</p>
             </div>
-        </div>
 
-        <div id="loading" class="hidden text-center my-8">
-            <p class="text-lg">Processing... This may take a moment.</p>
-        </div>
-
-        <div id="results" class="hidden mt-8">
-            <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
-                <h3 class="text-2xl font-semibold mb-4">Transcription</h3>
-                <p id="transcription-output" class="text-gray-700 whitespace-pre-wrap"></p>
+            <div id="summary-container" class="hidden mt-8">
+                <h2 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 mb-4">Generated Study Guide:</h2>
+                <div id="summary" class="bg-gray-700 p-6 rounded-lg text-gray-300"></div>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow-lg">
-                <h3 class="text-2xl font-semibold mb-4">Summary</h3>
-                <p id="summary-output" class="text-gray-700 whitespace-pre-wrap"></p>
+
+            <div id="error-container" class="hidden mt-6 text-red-400 text-center">
+                <p>An error occurred. Please try again.</p>
             </div>
         </div>
     </div>
 
     <script src="/static/script.js"></script>
+
 </body>
 </html>
