@@ -4,6 +4,7 @@ import faiss
 import pickle
 import numpy as np
 from transformers import AutoTokenizer, pipeline, AutoModel, AutoModelForCausalLM
+from peft import PeftModel
 
 from dotenv import load_dotenv
 from typing import TypedDict
@@ -99,6 +100,11 @@ def generate_node(state: GraphState):
             max_tokens=2048,
         )
         summary = chat_completion.choices[0].message.content
+    elif llm == "finetuned":
+        prompt = models["prompt_template"].format(transcript=state["transcript"], retrieved_text=state["retrieved_text"])
+        inputs = models["finetuned_tokenizer"](prompt, return_tensors="pt").to(models["device"])
+        outputs = models["finetuned_model"].generate(**inputs, max_length=2048)
+        summary = models["finetuned_tokenizer"].decode(outputs[0], skip_special_tokens=True)
     else:
         raise ValueError(f"Invalid LLM option: {llm}")
     return {"summary": summary}
@@ -129,6 +135,9 @@ async def lifespan(app: FastAPI):
     models["prompt_template"] = ChatPromptTemplate.from_messages(
         [("human", "## Lecture Transcript:\n{transcript}\n\n## Retrieved Textbook Excerpts:\n{retrieved_text}\n\nBased on the lecture transcript and the retrieved textbook excerpts, generate a comprehensive study guide or summary.")]
     )
+    base_model = AutoModelForCausalLM.from_pretrained(BASE_MODEL_NAME).to(models["device"])
+    models["finetuned_model"] = PeftModel.from_pretrained(base_model, "/teamspace/studios/this_studio/Study-Spark/models/gemma-lora-finetuned").to(models["device"])
+    models["finetuned_tokenizer"] = AutoTokenizer.from_pretrained("/teamspace/studios/this_studio/Study-Spark/models/gemma-lora-finetuned")
     
 
 
