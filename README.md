@@ -8,6 +8,12 @@
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
 </div>
 
+## Author
+
+- **Name:** Akshit
+- **University:** IIT Roorkee
+- **Department:** Chemical Engineering
+
 **Study-Spark** is a comprehensive suite of tools designed to revolutionize your study process. By leveraging cutting-edge AI, this project transforms lecture audio and textbook content into high-quality, structured study guides. At its core, Study-Spark is powered by a sophisticated Retrieval-Augmented Generation (RAG) pipeline and a fine-tuned language model, all accessible through an intuitive web interface.
 
 ## System Overview
@@ -60,7 +66,9 @@ The system is divided into three main parts:
 1.  **User Query:** A user provides a query (e.g., a question about a deep learning concept).
 2.  **Retrieve:** The user's query is embedded using the same `google/embedding-gemma-300m` model. The FAISS index is then searched to find the most relevant page chunks from the textbook.
 3.  **Augment:** The retrieved text chunks are combined with the user's original query to form a detailed prompt.
-4.  **Generate:** A powerful language model (e.g., Gemini, or a local model like Phi-3) is used to generate a comprehensive answer or study guide based on the augmented prompt.
+4.  **Generate:** A powerful language model is used to generate a comprehensive answer or study guide based on the augmented prompt. The system supports multiple models, providing flexibility for different hardware and testing purposes:
+    - **GROQ:** Utilizes the `OSS-120b` model for fast inference, ideal for testing purposes.
+    - **Fine-Tuned Model:** A locally-trained, domain-specific model is also available, but requires a GPU for inference.
 
 ## Core Architecture
 
@@ -113,7 +121,7 @@ This project produces several key artifacts that are essential for its operation
 Follow these steps to process your data, train the model, and run the application.
 
 1.  **Add Your Textbook:**
-    Place your textbook (e.g., `UnderstandingDeepLearning.pdf`) in the `data/raw/` directory.
+    Place your textbook in the `data/raw/` directory. This project uses `UnderstandingDeepLearning.pdf` as an example because it is available for free and is not pirated. You can use any PDF textbook of your choice.
 
 2.  **Extract Text from PDF:**
     ```bash
@@ -142,6 +150,10 @@ Follow these steps to process your data, train the model, and run the applicatio
     ```
     You can then access the web interface at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
+## Credits
+
+The brain of this project was me, Akshit. The Gemini CLI acted as a code writing assistant, obeying my orders to generate the basic structure. Every single line of code was then carefully reviewed, debugged, and optimized by me. All additional features and functionalities were also implemented by me to enhance the project.
+
 ## Scope for Improvement
 
 The current version of Study-Spark is a powerful tool, but there are many opportunities for future enhancements.
@@ -150,6 +162,7 @@ The current version of Study-Spark is a powerful tool, but there are many opport
 
 - **Experiment with Larger Models:** While `gemma-3-270m-it` is a solid baseline, using a more powerful model like `gemma-3-9b-it` or other large open-source models could significantly improve performance.
 - **Refine the Dataset:** The quality of the fine-tuned model is directly tied to the training data. The synthetic data generation pipeline could be enhanced to create a larger, more diverse, and more accurate dataset.
+- **Performance Note:** Due to resource constraints, the current fine-tuned LLM does not perform optimally. However, this prototype is designed to be highly cost-efficient and effective when scaled with more computational resources.
 
 ### 2. RAG Pipeline Enhancements
 
