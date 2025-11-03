@@ -79,6 +79,72 @@ The system is built on a modular architecture that seamlessly integrates data pr
 - **Model Fine-Tuning:** The fine-tuning process enhances the language model's ability to generate domain-specific, high-quality summaries.
 - **Inference and Application:** The final step is to bring all the components together in a user-friendly web application.
 
+Here is a flowchart of the complete architecture:
+
+```
++-------------------------+
+| [PDF] data/raw/         |
++-------------------------+
+            |
+            v
++-------------------------+
+| extract_text_from_pdf.py|
++-------------------------+
+            |
+            v
++-------------------------+
+| [.txt] data/processed/  |
++-------------------------+
+            |
+            +--------------------------------------------------+
+            |                                                  |
+            v                                                  v
++-----------------------------+                    +----------------------------------+
+|   `create_faiss_index.py`   |                    | `generate_synthetic_dataset.py`  |
+|-----------------------------|                    |----------------------------------|
+| - Text Chunking             |                    | - Chapter Parser                 |
+| - Embedding Model           |                    | - Gemini API (Lectures)          |
+| - FAISS Indexer             |                    | - FAISS Searcher                 |
+|                             |                    | - Gemini API (Summarization)     |
++-----------------------------+                    +----------------------------------+
+            |                                                  |
+            v                                                  v
++-----------------------------+                    +----------------------------------+
+| [faiss_index.bin]           |                    | [finetuning_dataset.jsonl]       |
+| [chunks.pkl]                |                    +----------------------------------+
++-----------------------------+                                |
+            |                                                  v
+            |                                    +----------------------------------+
+            |                                    |    `train_lora_model.py`         |
+            |                                    |----------------------------------|
+            |                                    | - Base Model                     |
+            |                                    | - LoRA Trainer                   |
+            |                                    +----------------------------------+
+            |                                                  |
+            |                                                  v
+            |                                    +----------------------------------+
+            |                                    | [Fine-tuned LoRA model]          |
+            |                                    +----------------------------------+
+            |                                                    |
+            +--------------------------+-------------------------+
+                                       |
+                                       v
+                         +-----------------------------+
+                         | `app/web/main.py` / `cli`   |
+                         |-----------------------------|
+                         | - Embedding Model           |
+                         | - FAISS Searcher            |
+                         | - Prompt Formatter          |
+                         | - Generator (LLM)           |
+                         +-----------------------------+
+                                       |
+                                       v
+                         +-----------------------------+
+                         |       User Interface        |
+                         +-----------------------------+
+```
+
+
 ## Project Artifacts
 
 This project produces several key artifacts that are essential for its operation:
