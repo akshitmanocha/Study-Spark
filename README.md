@@ -62,7 +62,7 @@ The current version of Study-Spark is a powerful tool, but there are many opport
 
 2.  **Clone the Repository:**
     ```bash
-    git clone <your-repository-url>
+    git clone https://github.com/akshitmanocha/Study-Spark
     cd Study-Spark
     ```
 
