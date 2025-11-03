@@ -154,6 +154,8 @@ Follow these steps to process your data, train the model, and run the applicatio
 
 The brain of this project was me, Akshit. The Gemini CLI acted as a code writing assistant, obeying my orders to generate the basic structure. Every single line of code was then carefully reviewed, debugged, and optimized by me. All additional features and functionalities were also implemented by me to enhance the project.
 
+**Note:** I am unable to provide all the logs for this project as I had to shift to a different virtual machine and lost the logs in the process.
+
 ## Scope for Improvement
 
 The current version of Study-Spark is a powerful tool, but there are many opportunities for future enhancements.
