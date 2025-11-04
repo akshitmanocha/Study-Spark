@@ -10,7 +10,7 @@
 
 ## Author
 
-- **Name:** Akshit
+- **Name:** Akshit Manocha
 - **University:** IIT Roorkee
 - **Department:** Chemical Engineering
 
@@ -57,7 +57,7 @@ The system is divided into three main parts:
 
 ---
 
-## Part 3: RAG-based Inference (Next Steps)
+## Part 3: RAG-based Inference
 
 **Goal:** To build an application that uses the created knowledge base to answer questions and generate study guides.
 
